@@ -54,12 +54,12 @@
                         </form>
                     </div> --}}
                 <div class="col-12">
-                    <div class="card">
+                    <div class="card" style="border-color:#fff;">
                         <div class="table-responsive">
                             <table class="table table-vcenter table-mobile-md card-table">
                                 <tbody>
                                     @forelse ($exchangeSuggestions as $suggestion)
-                                        <tr>
+                                        <tr style="border-color:#fff;">
                                             <td>
                                                 <div class="d-flex py-1 align-items-center">
                                                     <div class="flex-fill">
@@ -98,6 +98,10 @@
                                                         Contacter
                                                     </a>
                                                 </div>
+                                            </td>
+                                        </tr>
+                                        <tr style="border-color:#fff;">
+                                            <td colspan="3" style="height: 30px; border: none; background: #f6f8fb;">
                                             </td>
                                         </tr>
                                     @empty
