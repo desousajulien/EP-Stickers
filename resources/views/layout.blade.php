@@ -200,7 +200,7 @@
     </div>
     <!-- Libs JS -->
     <!-- Tabler Core -->
-    <script src="js/tabler.min.js" defer></script>
+    @vite(['resources/js/tabler.min.js'])
 </body>
 
 </html>
