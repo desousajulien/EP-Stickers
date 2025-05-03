@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StickerUserController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\ExchangeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [StickerUserController::class, 'myStickers'])
@@ -15,6 +16,10 @@ Route::post('/update-sticker', [StickerUserController::class, 'updateSticker'])
 
 Route::get('/exchanges', [StickerUserController::class, 'findStickers'])
 ->middleware(['auth', 'verified']);
+
+Route::post('/exchange/send-email', [ExchangeController::class, 'sendEmail'])
+    ->middleware(['auth', 'verified'])
+    ->name('exchange.sendEmail');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

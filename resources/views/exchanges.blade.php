@@ -107,7 +107,9 @@
                                             <td>
                                                 <div class="btn-list flex-nowrap">
                                                     <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                                        data-bs-target="#modal-contact" id="modal-button">
+                                                        data-bs-target="#modal-contact"
+                                                        data-email="{{ $suggestion['other_user']->email }}"
+                                                        id="modal-button">
                                                         Contacter
                                                     </button>
                                                 </div>
@@ -158,7 +160,7 @@
                     <div class="modal-footer">
                         <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
                             Annuler </a>
-                        <a href="#" class="btn btn-primary ms-auto" data-bs-dismiss="modal">
+                        <a href="#" class="btn btn-primary ms-auto" data-bs-dismiss="modal" id="modal-send">
                             Envoyer
                         </a>
                     </div>
@@ -168,6 +170,7 @@
     </div>
     </div>
     <script>
+        let selectedEmail = '';
         $(document).ready(function() {
             $('#modal-button').on('click', function(event) {
                 var message = 'Bonjour ';
@@ -180,6 +183,29 @@
                     '\n\nN\'hésitez pas à me dire si un échange vous intéresse.\n\nBien cordialement,';
                 message += '\n\n' + '{{ Auth::user()->firstname }}';
                 $('#modal-message').val(message);
+                selectedEmail = $(this).data('email');
+            });
+
+            $('#modal-send').on('click', function() {
+                let message = $('#modal-message').val();
+
+                $.ajax({
+                    url: '{{ route('exchange.sendEmail') }}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    data: {
+                        to: selectedEmail,
+                        message: message
+                    },
+                    success: function(response) {
+                        alert('Email envoyé avec succès !');
+                    },
+                    error: function() {
+                        alert('Erreur lors de l\'envoi de l\'email.');
+                    }
+                });
             });
         });
     </script>
