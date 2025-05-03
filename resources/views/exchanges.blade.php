@@ -66,37 +66,50 @@
                                                         <div class="font-weight-medium"><strong>Je peux demander
                                                                 :</strong></div>
                                                         <div>
+                                                            @php($theyCanGive = '')
                                                             @foreach ($suggestion['theyCanGive'] as $sticker)
                                                                 <span
                                                                     class="badge badge-lg bg-green text-green-fg">{{ $sticker->sticker->id }}</span>
+                                                                @php($theyCanGive .= $sticker->sticker->id . ', ')
                                                             @endforeach
+                                                            <span class="theyCanGive"
+                                                                style="display:none;">{{ $theyCanGive }}</span>
                                                         </div>
                                                         <br>
                                                         <div class="font-weight-medium"><strong>Je peux proposer
                                                                 :</strong></div>
                                                         <div>
-                                                            @forelse ($suggestion['iCanGive'] as $mySticker)
-                                                                <span
-                                                                    class="badge badge-lg bg-red text-red-fg">{{ $mySticker->sticker->id }}</span>
-                                                            @empty
-                                                                <li>Tu n’as rien à leur proposer</li>
-                                                            @endforelse
+                                                            @php($iCanGive = '')
+                                                            @if ($suggestion['iCanGive'] == null)
+                                                                <p>Tu n’as rien à leur proposer</p>
+                                                            @else
+                                                                @foreach ($suggestion['iCanGive'] as $mySticker)
+                                                                    <span
+                                                                        class="badge badge-lg bg-red text-red-fg">{{ $mySticker->sticker->id }}</span>
+                                                                    @php($iCanGive .= $mySticker->sticker->id . ', ')
+                                                                @endforeach
+                                                            @endif
+
+                                                            <span class="iCanGive"
+                                                                style="display:none;">{{ $iCanGive }}</span>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td data-label="Title">
+                                            <td>
                                                 <div>
-                                                    {{ $suggestion['other_user']->firstname . ' ' . $suggestion['other_user']->name }}
+                                                    <span
+                                                        class="firstname">{{ $suggestion['other_user']->firstname }}</span>
+                                                    {{ $suggestion['other_user']->name }}
                                                 </div>
                                                 <div class="text-secondary">France</div>
                                             </td>
                                             <td>
                                                 <div class="btn-list flex-nowrap">
-                                                    <a href="#" class="btn btn-primary" data-bs-toggle="modal"
-                                                        data-bs-target="#modal-team">
+                                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                                        data-bs-target="#modal-contact" id="modal-button">
                                                         Contacter
-                                                    </a>
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -113,6 +126,61 @@
                 </div>
             </div>
         </div>
+        <div class="modal" id="modal-contact" tabindex="-1">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Demande d'échange</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            {{-- <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Client name</label>
+                                    <input type="text" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Reporting period</label>
+                                    <input type="date" class="form-control" />
+                                </div>
+                            </div> --}}
+                            <div class="col-lg-12">
+                                <div>
+                                    <label class="form-label">Message</label>
+                                    <textarea class="form-control" rows=15" id="modal-message"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+                            Annuler </a>
+                        <a href="#" class="btn btn-primary ms-auto" data-bs-dismiss="modal">
+                            Envoyer
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     </div>
+    <script>
+        $(document).ready(function() {
+            $('#modal-button').on('click', function(event) {
+                var message = 'Bonjour ';
+                message += $(this).closest('tr').find('.firstname').text();
+                message += ',\n\nJe suis intéressé par les stickers suivants : \n';
+                message += $(this).closest('tr').find('.theyCanGive').text();
+                message += '\n\nJe peux vous proposer : \n';
+                message += $(this).closest('tr').find('.iCanGive').text();
+                message +=
+                    '\n\nN\'hésitez pas à me dire si un échange vous intéresse.\n\nBien cordialement,';
+                message += '\n\n' + '{{ Auth::user()->firstname }}';
+                $('#modal-message').val(message);
+            });
+        });
+    </script>
 @endsection
