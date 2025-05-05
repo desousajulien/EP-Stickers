@@ -11,9 +11,10 @@ class ExchangeController extends Controller
     public function sendEmail(Request $request)
     {
         Mail::raw($request->message, function ($mail) use ($request) {
+            $name = Auth::user()->firstname . ' ' . Auth::user()->name;
             $mail->to($request->to)
                 ->subject('Demande d\'échange de stickers Europa-Park')
-                ->from(Auth::user()->email, Auth::user()->name);
+                ->replyTo(Auth::user()->email, $name);
         });
 
         return response()->json(['success' => true]);
