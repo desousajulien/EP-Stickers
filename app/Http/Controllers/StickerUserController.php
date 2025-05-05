@@ -10,16 +10,16 @@ class StickerUserController extends Controller
     public function myStickers()
     {
         $stickers = StickerUser::where('user_id', auth()->id())
-    ->with('sticker.category') // relation imbriquée
-    ->with('state') // si tu utilises aussi la relation state
-    ->get();
+            ->with('sticker.category') // relation imbriquée
+            ->with('state') // si tu utilises aussi la relation state
+            ->get();
 
 
         $totalStickers = 156;
 
         $totalPosseded = StickerUser::where('user_id', auth()->id())
-        ->where('state_id', '!=', 1)
-        ->count();
+            ->where('state_id', '!=', 1)
+            ->count();
 
         $tauxPosseded = round(($totalPosseded * 100) / $totalStickers);
 
@@ -28,8 +28,8 @@ class StickerUserController extends Controller
         $tauxMissing = round(($totalMissing * 100) / $totalStickers);
 
         $totalDoubles = StickerUser::where('user_id', auth()->id())
-        ->where('state_id', 3)
-        ->count();
+            ->where('state_id', 3)
+            ->count();
 
         $tauxDoubles = round(($totalDoubles * 100) / $totalStickers);
 
@@ -65,62 +65,66 @@ class StickerUserController extends Controller
     {
         $currentUserId = auth()->id();
 
-    // Tes doubles (à toi)
-    $myDoubles = StickerUser::where('user_id', $currentUserId)
-        ->where('state_id', 3)
-        ->with('sticker')
-        ->get();
+        // Mes stickers en double (state_id = 3)
+        $myDoubles = StickerUser::where('user_id', $currentUserId)
+            ->where('state_id', 3)
+            ->with('sticker')
+            ->get();
 
-    // Les stickers que tu ne possèdes pas
-    $myMissingIds = StickerUser::where('user_id', $currentUserId)
-        ->where('state_id', 1)
-        ->pluck('sticker_id')
-        ->toArray();
+        // Numéros des stickers que je n'ai pas
+        $myMissingNumbers = StickerUser::where('user_id', $currentUserId)
+            ->where('state_id', 1)
+            ->join('stickers', 'stickers.id', '=', 'user_stickers.sticker_id')
+            ->pluck('stickers.number')
+            ->toArray();
 
-    // Les stickers que d'autres possèdent en double et que tu n'as pas
-    $potentialTrades = StickerUser::where('state_id', 3)
-        ->where('user_id', '!=', $currentUserId)
-        ->whereIn('sticker_id', $myMissingIds)
-        ->with(['sticker', 'user'])
-        ->get();
+        // Stickers en double chez d'autres utilisateurs que je n'ai pas
+        $potentialTrades = StickerUser::where('state_id', 3)
+            ->where('user_id', '!=', $currentUserId)
+            ->join('stickers', 'stickers.id', '=', 'user_stickers.sticker_id')
+            ->whereIn('stickers.number', $myMissingNumbers)
+            ->with(['sticker', 'user'])
+            ->get();
 
-    // Indexer tes propres doubles par leur ID pour les rechercher rapidement
-    $myDoublesMap = $myDoubles->keyBy('sticker_id');
+        // Indexer mes doubles par leur numéro
+        $myDoublesByNumber = $myDoubles->keyBy(function ($item) {
+            return $item->sticker->number;
+        });
 
-    $groupedSuggestions = [];
+        $groupedSuggestions = [];
 
-foreach ($potentialTrades as $stickerFromOtherUser) {
-    $otherUser = $stickerFromOtherUser->user;
-    $otherUserId = $otherUser->id;
+        foreach ($potentialTrades as $stickerFromOtherUser) {
+            $otherUser = $stickerFromOtherUser->user;
+            $otherUserId = $otherUser->id;
 
-    if (!isset($groupedSuggestions[$otherUserId])) {
-        // Initialisation si l'utilisateur n'existe pas encore dans le tableau
-        $groupedSuggestions[$otherUserId] = [
-            'other_user' => $otherUser,
-            'theyCanGive' => [],
-            'iCanGive' => [],
-        ];
-    }
+            if (!isset($groupedSuggestions[$otherUserId])) {
+                $groupedSuggestions[$otherUserId] = [
+                    'other_user' => $otherUser,
+                    'theyCanGive' => [],
+                    'iCanGive' => [],
+                ];
+            }
 
-    $groupedSuggestions[$otherUserId]['theyCanGive'][] = $stickerFromOtherUser;
-}
+            $groupedSuggestions[$otherUserId]['theyCanGive'][] = $stickerFromOtherUser;
+        }
 
-// Associer les stickers que tu peux donner à chaque utilisateur
-foreach ($groupedSuggestions as $userId => &$suggestion) {
-    $otherMissing = StickerUser::where('user_id', $userId)
-        ->where('state_id', 1)
-        ->pluck('sticker_id')
-        ->toArray();
+        // Associer les stickers que tu peux donner à chaque utilisateur
+        foreach ($groupedSuggestions as $userId => &$suggestion) {
+            $otherMissingNumbers = StickerUser::where('user_id', $userId)
+                ->where('state_id', 1)
+                ->join('stickers', 'stickers.id', '=', 'user_stickers.sticker_id')
+                ->pluck('stickers.number')
+                ->toArray();
 
-    $iCanGive = $myDoubles->filter(function ($item) use ($otherMissing) {
-        return in_array($item->sticker_id, $otherMissing);
-    });
+            $iCanGive = $myDoubles->filter(function ($item) use ($otherMissingNumbers) {
+                return in_array($item->sticker->number, $otherMissingNumbers);
+            });
 
-    $suggestion['iCanGive'] = $iCanGive->values();
-}
+            $suggestion['iCanGive'] = $iCanGive->values();
+        }
 
-$exchangeSuggestions = array_values($groupedSuggestions); // Réindexation propre
+        $exchangeSuggestions = array_values($groupedSuggestions);
 
-return view('exchanges', compact('exchangeSuggestions'));
+        return view('exchanges', compact('exchangeSuggestions'));
     }
 }
