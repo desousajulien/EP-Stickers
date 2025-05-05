@@ -25,6 +25,11 @@ class User extends Authenticatable
         'password',
     ];
 
+    public function country()
+    {
+        return $this->belongsTo(Country::class, 'country_id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
