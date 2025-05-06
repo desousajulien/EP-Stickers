@@ -1,0 +1,24 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-DDjXOJ5_.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/css/tabler.css": {
+    "file": "assets/tabler-DzMv83W9.css",
+    "src": "resources/css/tabler.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-Bo-u61x1.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/tabler.min.js": {
+    "file": "assets/tabler.min-C9Jh6Nq-.js",
+    "name": "tabler.min",
+    "src": "resources/js/tabler.min.js",
+    "isEntry": true
+  }
+}
