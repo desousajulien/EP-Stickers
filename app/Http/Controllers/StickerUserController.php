@@ -129,6 +129,10 @@ class StickerUserController extends Controller
         }
 
         $exchangeSuggestions = array_values($groupedSuggestions);
+        // Trier les suggestions en fonction du nombre de stickers que tu peux demander
+        usort($exchangeSuggestions, function($a, $b) {
+            return count($b['theyCanGive']) - count($a['theyCanGive']);
+        });
 
         return view('exchanges', compact('exchangeSuggestions'));
     }
