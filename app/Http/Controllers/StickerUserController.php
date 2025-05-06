@@ -7,11 +7,16 @@ use App\Models\StickerUser;
 
 class StickerUserController extends Controller
 {
-    public function myStickers()
+    public function myStickers(Request $request)
     {
+        $state = (int)$request->query('state', 0);
+
         $stickers = StickerUser::where('user_id', auth()->id())
-            ->with('sticker.category') // relation imbriquée
-            ->with('state') // si tu utilises aussi la relation state
+            ->when($state !== 0, function ($query) use ($state) {
+                $query->where('state_id', $state);
+            })
+            ->with('sticker.category')
+            ->with('state')
             ->get();
 
 
