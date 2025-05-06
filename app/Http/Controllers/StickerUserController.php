@@ -136,4 +136,11 @@ class StickerUserController extends Controller
 
         return view('exchanges', compact('exchangeSuggestions'));
     }
+
+    public function stats()
+    {
+        return view('stats', [
+            
+        ]);
+    }
 }
